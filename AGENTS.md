@@ -13,7 +13,7 @@ toybox/
 ├── index.html          # Main game selection page
 ├── style.css           # Styles for the main page
 └── games/
-    ├── maze/           # Mouse and cheese maze game (touch controls via d-pad)
+    ├── maze/           # Mouse maze game with cheese trail scoring (touch d-pad)
     ├── feathers/       # Feather collection game
     └── powder/         # Physics sandbox with many elements
 ```
@@ -51,7 +51,7 @@ The powder game has these elements and behaviors:
 - **Sand** - Falls, displaces liquids
 - **Water** - Flows, extinguishes fire, freezes near ice
 - **Wall** - Static barrier (can be destroyed by explosions)
-- **Fire** - Burns wood/plants, extinguished by water, ignites oil
+- **Fire** - Burns wood/plants, extinguished by water, ignites oil, melts ice
 - **Wood** - Flammable, leaves ash when burned
 - **Smoke** - Rises and dissipates
 - **Oil** - Liquid, explodes on contact with fire (large radius)
