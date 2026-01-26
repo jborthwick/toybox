@@ -3,6 +3,8 @@ let maze = [];
 let playerPos = { x: 1, y: 1 };
 let goalPos = { x: 0, y: 0 };
 let mazeSize = 7;
+let cheeses = [];
+let score = 0;
 
 // Sound effects using Web Audio API
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -39,6 +41,13 @@ function playSound(type) {
             osc.stop(audioCtx.currentTime + i * 0.15 + 0.15);
         });
         return;
+    } else if (type === 'cheese') {
+        // Play a happy chirp for collecting cheese
+        oscillator.frequency.value = 600;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.15;
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
     }
 }
 
@@ -109,10 +118,16 @@ function renderMaze() {
             cell.dataset.x = x;
             cell.dataset.y = y;
 
+            // Check if this cell has a bonus cheese
+            const hasCheese = cheeses.some(c => c.x === x && c.y === y);
+
             if (x === playerPos.x && y === playerPos.y) {
                 cell.classList.add('player');
             } else if (x === goalPos.x && y === goalPos.y) {
                 cell.classList.add('goal');
+                cell.textContent = '🕳️';
+            } else if (hasCheese) {
+                cell.classList.add('path', 'cheese');
                 cell.textContent = '🧀';
             } else if (maze[y][x] === 1) {
                 cell.classList.add('wall');
@@ -145,14 +160,84 @@ function findGoalPosition() {
     return bestPos;
 }
 
+// Find the solution path using BFS
+function findSolutionPath() {
+    const start = { x: 1, y: 1 };
+    const goal = goalPos;
+    const queue = [{ x: start.x, y: start.y, path: [] }];
+    const visited = new Set();
+    visited.add(`${start.x},${start.y}`);
+
+    const directions = [
+        { dx: 0, dy: -1 },
+        { dx: 0, dy: 1 },
+        { dx: -1, dy: 0 },
+        { dx: 1, dy: 0 }
+    ];
+
+    while (queue.length > 0) {
+        const current = queue.shift();
+
+        if (current.x === goal.x && current.y === goal.y) {
+            return current.path;
+        }
+
+        for (const dir of directions) {
+            const nx = current.x + dir.dx;
+            const ny = current.y + dir.dy;
+            const key = `${nx},${ny}`;
+
+            if (nx >= 0 && nx < mazeSize && ny >= 0 && ny < mazeSize &&
+                maze[ny][nx] === 0 && !visited.has(key)) {
+                visited.add(key);
+                queue.push({
+                    x: nx,
+                    y: ny,
+                    path: [...current.path, { x: nx, y: ny }]
+                });
+            }
+        }
+    }
+
+    return [];
+}
+
+// Place cheeses along the solution path
+function placeCheeses() {
+    cheeses = [];
+    const solutionPath = findSolutionPath();
+
+    // Remove the goal position from the path (last element)
+    const pathWithoutGoal = solutionPath.slice(0, -1);
+
+    // Place cheeses at intervals along the path
+    // More spacing for smaller mazes, less for larger ones
+    const spacing = Math.max(2, Math.floor(mazeSize / 5));
+
+    for (let i = spacing - 1; i < pathWithoutGoal.length; i += spacing) {
+        cheeses.push(pathWithoutGoal[i]);
+    }
+}
+
 // Start a new game
 function newGame() {
     mazeSize = parseInt(sizeSelect.value);
     maze = generateMaze(mazeSize);
     playerPos = { x: 1, y: 1 };
     goalPos = findGoalPosition();
+    placeCheeses();
+    score = 0;
+    updateScore();
     winMessage.classList.add('hidden');
     renderMaze();
+}
+
+// Update score display
+function updateScore() {
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+        scoreElement.textContent = score;
+    }
 }
 
 // Move the player
@@ -164,13 +249,25 @@ function movePlayer(dx, dy) {
     if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize && maze[newY][newX] === 0) {
         playerPos.x = newX;
         playerPos.y = newY;
-        playSound('move');
+
+        // Check for cheese collection
+        const cheeseIndex = cheeses.findIndex(c => c.x === newX && c.y === newY);
+        if (cheeseIndex !== -1) {
+            cheeses.splice(cheeseIndex, 1);
+            score += 10;
+            updateScore();
+            playSound('cheese');
+        } else {
+            playSound('move');
+        }
+
         renderMaze();
 
         // Check for win
         if (playerPos.x === goalPos.x && playerPos.y === goalPos.y) {
             playSound('win');
             setTimeout(() => {
+                document.getElementById('final-score').textContent = score;
                 winMessage.classList.remove('hidden');
             }, 100);
         }
@@ -215,6 +312,10 @@ playAgainButton.addEventListener('click', newGame);
 document.querySelectorAll('.d-pad-btn').forEach(btn => {
     const handler = (e) => {
         e.preventDefault();
+        // Resume audio context on touch (required for iOS/mobile)
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
         const dir = btn.dataset.dir;
         switch (dir) {
             case 'up': movePlayer(0, -1); break;

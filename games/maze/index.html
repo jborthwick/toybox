@@ -22,9 +22,10 @@
                 <option value="41">Epic (41x41)</option>
             </select>
             <button id="new-maze">New Maze</button>
+            <span class="score-display">🧀 <span id="score">0</span></span>
         </div>
         <div id="maze"></div>
-        <p class="instructions">Use arrow keys, WASD, or the buttons below to move the 🐭 to the 🧀!</p>
+        <p class="instructions">Use arrow keys, WASD, or the buttons below to move the 🐭 to the 🕳️! Collect 🧀 for bonus points!</p>
         <div class="d-pad">
             <button class="d-pad-btn up" data-dir="up">▲</button>
             <button class="d-pad-btn left" data-dir="left">◀</button>
@@ -32,7 +33,8 @@
             <button class="d-pad-btn down" data-dir="down">▼</button>
         </div>
         <div id="win-message" class="hidden">
-            <h2>🎉 You found the cheese! 🧀</h2>
+            <h2>🎉 You escaped! 🕳️</h2>
+            <p class="final-score">Score: <span id="final-score">0</span></p>
             <button id="play-again">Play Again</button>
         </div>
     </div>

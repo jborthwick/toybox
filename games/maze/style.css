@@ -124,6 +124,28 @@ button:hover {
     font-size: 1.4em;
 }
 
+.cheese {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+}
+
+.score-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    padding: 8px 16px;
+    background: #ffd700;
+    border-radius: 8px;
+}
+
+.final-score {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
 @keyframes pulse {
     0%, 100% { transform: scale(0.9); }
     50% { transform: scale(1); }
