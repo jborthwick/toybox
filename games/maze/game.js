@@ -211,5 +211,21 @@ document.addEventListener('keydown', (e) => {
 newMazeButton.addEventListener('click', newGame);
 playAgainButton.addEventListener('click', newGame);
 
+// D-pad button event listeners
+document.querySelectorAll('.d-pad-btn').forEach(btn => {
+    const handler = (e) => {
+        e.preventDefault();
+        const dir = btn.dataset.dir;
+        switch (dir) {
+            case 'up': movePlayer(0, -1); break;
+            case 'down': movePlayer(0, 1); break;
+            case 'left': movePlayer(-1, 0); break;
+            case 'right': movePlayer(1, 0); break;
+        }
+    };
+    btn.addEventListener('click', handler);
+    btn.addEventListener('touchstart', handler, { passive: false });
+});
+
 // Start the game
 newGame();

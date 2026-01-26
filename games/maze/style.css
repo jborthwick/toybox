@@ -135,6 +135,42 @@ button:hover {
     font-size: 0.9rem;
 }
 
+.d-pad {
+    display: grid;
+    grid-template-areas:
+        ". up ."
+        "left . right"
+        ". down .";
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(3, 60px);
+    gap: 5px;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.d-pad-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.d-pad-btn.up { grid-area: up; }
+.d-pad-btn.down { grid-area: down; }
+.d-pad-btn.left { grid-area: left; }
+.d-pad-btn.right { grid-area: right; }
+
+.d-pad-btn:active {
+    transform: scale(0.95);
+    background: #4a5bc7;
+}
+
 #win-message {
     position: fixed;
     top: 0;

@@ -24,7 +24,13 @@
             <button id="new-maze">New Maze</button>
         </div>
         <div id="maze"></div>
-        <p class="instructions">Use arrow keys or WASD to move the 🐭 to the 🧀!</p>
+        <p class="instructions">Use arrow keys, WASD, or the buttons below to move the 🐭 to the 🧀!</p>
+        <div class="d-pad">
+            <button class="d-pad-btn up" data-dir="up">▲</button>
+            <button class="d-pad-btn left" data-dir="left">◀</button>
+            <button class="d-pad-btn right" data-dir="right">▶</button>
+            <button class="d-pad-btn down" data-dir="down">▼</button>
+        </div>
         <div id="win-message" class="hidden">
             <h2>🎉 You found the cheese! 🧀</h2>
             <button id="play-again">Play Again</button>
