@@ -195,6 +195,10 @@ function updateParticle(x, y, updated) {
                     setCell(x, y, TYPES.SMOKE);
                     return;
                 }
+                // Fire melts ice into water
+                if (neighbor === TYPES.ICE && Math.random() < 0.3) {
+                    setCell(x + dx, y + dy, TYPES.WATER);
+                }
             }
         }
         // Fire rises and eventually becomes smoke (or ash if burning material)
