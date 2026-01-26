@@ -13,6 +13,7 @@ const TYPES = {
     WOOD: 5,
     SMOKE: 6,
     OIL: 7,
+    ICE: 8,
 };
 
 // Element colors
@@ -25,6 +26,7 @@ const COLORS = {
     [TYPES.WOOD]: '#8b5a2b',
     [TYPES.SMOKE]: '#708090',
     [TYPES.OIL]: '#2d2d2d',
+    [TYPES.ICE]: '#a8e4ef',
 };
 
 // Fire color variations
@@ -167,6 +169,20 @@ function updateParticle(x, y, updated) {
         } else if (isEmpty(x + dir, y)) {
             swap(x, y, x + dir, y);
         }
+    } else if (type === TYPES.ICE) {
+        // Ice freezes nearby water and melts near fire
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const neighbor = getCell(x + dx, y + dy);
+                if (neighbor === TYPES.WATER && Math.random() < 0.15) {
+                    setCell(x + dx, y + dy, TYPES.ICE);
+                }
+                if (neighbor === TYPES.FIRE) {
+                    setCell(x, y, TYPES.WATER);
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -200,6 +216,8 @@ function render() {
                 color = FIRE_COLORS[Math.floor(Math.random() * FIRE_COLORS.length)];
             } else if (type === TYPES.WATER) {
                 color = Math.random() < 0.1 ? '#5ba3ec' : '#4a90d9';
+            } else if (type === TYPES.ICE) {
+                color = Math.random() < 0.15 ? '#c4f0f7' : '#a8e4ef';
             }
 
             // Parse hex color
