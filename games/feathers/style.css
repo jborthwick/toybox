@@ -1,0 +1,185 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.game-container {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+}
+
+.controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#feather-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #56ab2f;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 2px solid #56ab2f;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #56ab2f;
+    color: white;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #4a9a2a;
+    transform: scale(1.05);
+}
+
+#play-area {
+    width: 500px;
+    height: 400px;
+    background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+#player {
+    position: absolute;
+    font-size: 2.5rem;
+    user-select: none;
+    z-index: 50;
+    transition: left 0.05s, top 0.05s;
+    filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.4));
+}
+
+.feather {
+    position: absolute;
+    font-size: 2rem;
+    user-select: none;
+    z-index: 1;
+}
+
+.feather.collected {
+    animation: collect 0.5s ease-out forwards;
+}
+
+@keyframes collect {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.leaf {
+    position: absolute;
+    font-size: 3rem;
+    user-select: none;
+    z-index: 10;
+    transition: left 0.15s, top 0.15s;
+    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.instructions {
+    color: #666;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+#win-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#win-message h2 {
+    color: #a8e063;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: bounce 0.5s ease infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+#win-message button {
+    font-size: 1.5rem;
+    padding: 15px 40px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 550px) {
+    #play-area {
+        width: 320px;
+        height: 280px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .leaf {
+        font-size: 2.2rem;
+    }
+
+    .feather {
+        font-size: 1.5rem;
+    }
+}

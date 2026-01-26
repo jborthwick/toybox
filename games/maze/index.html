@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-maze-ing! | Game Collection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="../../index.html" class="back-button">← Back to Games</a>
+    <div class="game-container">
+        <h1>A-maze-ing!</h1>
+        <div class="controls">
+            <label for="size">Maze Size: </label>
+            <select id="size">
+                <option value="5">Tiny (5x5)</option>
+                <option value="7" selected>Small (7x7)</option>
+                <option value="11">Medium (11x11)</option>
+                <option value="15">Big (15x15)</option>
+                <option value="21">Huge (21x21)</option>
+                <option value="31">Giant (31x31)</option>
+                <option value="41">Epic (41x41)</option>
+            </select>
+            <button id="new-maze">New Maze</button>
+        </div>
+        <div id="maze"></div>
+        <p class="instructions">Use arrow keys or WASD to move. Get to the green square!</p>
+        <div id="win-message" class="hidden">
+            <h2>You did it!</h2>
+            <button id="play-again">Play Again</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
