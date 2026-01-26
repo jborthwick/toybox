@@ -14,6 +14,10 @@ const TYPES = {
     SMOKE: 6,
     OIL: 7,
     ICE: 8,
+    EXPLOSION: 9,
+    PLANT: 10,
+    ASH: 11,
+    FLOWER: 12,
 };
 
 // Element colors
@@ -27,10 +31,20 @@ const COLORS = {
     [TYPES.SMOKE]: '#708090',
     [TYPES.OIL]: '#2d2d2d',
     [TYPES.ICE]: '#a8e4ef',
+    [TYPES.EXPLOSION]: '#ffff00',
+    [TYPES.PLANT]: '#228b22',
+    [TYPES.ASH]: '#4a4a4a',
+    [TYPES.FLOWER]: '#ff69b4',
 };
+
+// Flower color variations
+const FLOWER_COLORS = ['#ff69b4', '#ff1493', '#da70d6', '#ff6347', '#ffd700', '#87ceeb'];
 
 // Fire color variations
 const FIRE_COLORS = ['#ff6b35', '#ff8c42', '#ffd700', '#ff4500'];
+
+// Explosion color variations
+const EXPLOSION_COLORS = ['#ffff00', '#ffcc00', '#ff9900', '#ffffff'];
 
 // Game state
 let grid = null;
@@ -80,7 +94,7 @@ function isLiquid(type) {
 }
 
 function isFlammable(type) {
-    return type === TYPES.WOOD || type === TYPES.OIL;
+    return type === TYPES.WOOD || type === TYPES.OIL || type === TYPES.PLANT;
 }
 
 function swap(x1, y1, x2, y2) {
@@ -94,6 +108,29 @@ function swap(x1, y1, x2, y2) {
 // Initialize grid
 function initGrid() {
     grid = new Uint8Array(WIDTH * HEIGHT);
+}
+
+// Create explosion at position
+function explode(cx, cy, radius) {
+    for (let dx = -radius; dx <= radius; dx++) {
+        for (let dy = -radius; dy <= radius; dy++) {
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist <= radius) {
+                const nx = cx + dx;
+                const ny = cy + dy;
+                if (inBounds(nx, ny)) {
+                    // Inner radius becomes explosion, outer becomes fire/smoke
+                    if (dist < radius * 0.5) {
+                        setCell(nx, ny, TYPES.EXPLOSION);
+                    } else if (dist < radius * 0.75) {
+                        setCell(nx, ny, TYPES.FIRE);
+                    } else {
+                        setCell(nx, ny, Math.random() < 0.5 ? TYPES.FIRE : TYPES.SMOKE);
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Update a single particle
@@ -136,11 +173,23 @@ function updateParticle(x, y, updated) {
         }
     } else if (type === TYPES.FIRE) {
         // Fire spreads to flammable materials, extinguished by water
+        let burningMaterial = false;
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 const neighbor = getCell(x + dx, y + dy);
-                if (isFlammable(neighbor) && Math.random() < 0.1) {
+                // Oil explodes when touched by fire
+                if (neighbor === TYPES.OIL && Math.random() < 0.3) {
+                    explode(x + dx, y + dy, 15);
+                    return;
+                }
+                // Wood and plant burn and leave ash
+                if ((neighbor === TYPES.WOOD || neighbor === TYPES.PLANT) && Math.random() < 0.1) {
                     setCell(x + dx, y + dy, TYPES.FIRE);
+                    burningMaterial = true;
+                }
+                // Track if we're adjacent to burnable material
+                if (neighbor === TYPES.WOOD || neighbor === TYPES.PLANT) {
+                    burningMaterial = true;
                 }
                 if (neighbor === TYPES.WATER) {
                     setCell(x, y, TYPES.SMOKE);
@@ -148,14 +197,24 @@ function updateParticle(x, y, updated) {
                 }
             }
         }
-        // Fire rises and eventually becomes smoke
+        // Fire rises and eventually becomes smoke (or ash if burning material)
         if (Math.random() < 0.1) {
-            setCell(x, y, TYPES.SMOKE);
+            // Only leave ash if fire was burning wood/plant
+            if (burningMaterial && Math.random() < 0.5) {
+                setCell(x, y, TYPES.ASH);
+            } else {
+                setCell(x, y, TYPES.SMOKE);
+            }
         } else if (isEmpty(x, y - 1) && Math.random() < 0.3) {
             swap(x, y, x, y - 1);
             updated[getIndex(x, y - 1)] = 1;
         } else if (isEmpty(x + dir, y - 1) && Math.random() < 0.2) {
             swap(x, y, x + dir, y - 1);
+        }
+    } else if (type === TYPES.EXPLOSION) {
+        // Explosion quickly turns to fire then smoke
+        if (Math.random() < 0.4) {
+            setCell(x, y, TYPES.FIRE);
         }
     } else if (type === TYPES.SMOKE) {
         // Smoke rises and dissipates
@@ -179,6 +238,57 @@ function updateParticle(x, y, updated) {
                 }
                 if (neighbor === TYPES.FIRE) {
                     setCell(x, y, TYPES.WATER);
+                    return;
+                }
+            }
+        }
+    } else if (type === TYPES.PLANT) {
+        // Plant grows when touching water
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const neighbor = getCell(x + dx, y + dy);
+                if (neighbor === TYPES.WATER && Math.random() < 0.1) {
+                    // Only consume water 20% of the time
+                    if (Math.random() < 0.2) {
+                        setCell(x + dx, y + dy, TYPES.EMPTY);
+                    }
+                    // Try to grow upward preferentially, then sideways
+                    const growDirs = [
+                        { gx: 0, gy: -1 },  // up
+                        { gx: -1, gy: -1 }, // up-left
+                        { gx: 1, gy: -1 },  // up-right
+                        { gx: -1, gy: 0 },  // left
+                        { gx: 1, gy: 0 },   // right
+                    ];
+                    for (const gd of growDirs) {
+                        if (isEmpty(x + gd.gx, y + gd.gy)) {
+                            // 20% chance to grow a flower instead of plant
+                            if (Math.random() < 0.2) {
+                                setCell(x + gd.gx, y + gd.gy, TYPES.FLOWER);
+                            } else {
+                                setCell(x + gd.gx, y + gd.gy, TYPES.PLANT);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    } else if (type === TYPES.ASH) {
+        // Ash falls like sand but lighter (can float on water)
+        if (isEmpty(x, y + 1)) {
+            swap(x, y, x, y + 1);
+            updated[getIndex(x, y + 1)] = 1;
+        } else if (isEmpty(x + dir, y + 1)) {
+            swap(x, y, x + dir, y + 1);
+            updated[getIndex(x + dir, y + 1)] = 1;
+        }
+    } else if (type === TYPES.FLOWER) {
+        // Flowers are static but can be burned
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (getCell(x + dx, y + dy) === TYPES.FIRE) {
+                    setCell(x, y, TYPES.FIRE);
                     return;
                 }
             }
@@ -218,6 +328,14 @@ function render() {
                 color = Math.random() < 0.1 ? '#5ba3ec' : '#4a90d9';
             } else if (type === TYPES.ICE) {
                 color = Math.random() < 0.15 ? '#c4f0f7' : '#a8e4ef';
+            } else if (type === TYPES.EXPLOSION) {
+                color = EXPLOSION_COLORS[Math.floor(Math.random() * EXPLOSION_COLORS.length)];
+            } else if (type === TYPES.PLANT) {
+                color = Math.random() < 0.2 ? '#2e8b2e' : '#228b22';
+            } else if (type === TYPES.ASH) {
+                color = Math.random() < 0.3 ? '#5a5a5a' : '#4a4a4a';
+            } else if (type === TYPES.FLOWER) {
+                color = FLOWER_COLORS[Math.floor((x * 7 + y * 13) % FLOWER_COLORS.length)];
             }
 
             // Parse hex color

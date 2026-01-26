@@ -13,9 +13,9 @@ toybox/
 ├── index.html          # Main game selection page
 ├── style.css           # Styles for the main page
 └── games/
-    ├── maze/           # Mouse and cheese maze game
+    ├── maze/           # Mouse and cheese maze game (touch controls via d-pad)
     ├── feathers/       # Feather collection game
-    └── powder/         # Sand/water/fire drawing game
+    └── powder/         # Physics sandbox with many elements
 ```
 
 Each game follows the same structure:
@@ -44,7 +44,21 @@ games/{game-name}/
 - Games should be simple and fun for kids
 - Use bright colors and clear visual feedback
 - Include sound effects using Web Audio API
-- Support keyboard and touch controls where appropriate
+- Support keyboard and touch controls where appropriate (e.g., d-pad for maze game)
+
+### Powder Play Element Interactions
+The powder game has these elements and behaviors:
+- **Sand** - Falls, displaces liquids
+- **Water** - Flows, extinguishes fire, freezes near ice
+- **Wall** - Static barrier (can be destroyed by explosions)
+- **Fire** - Burns wood/plants, extinguished by water, ignites oil
+- **Wood** - Flammable, leaves ash when burned
+- **Smoke** - Rises and dissipates
+- **Oil** - Liquid, explodes on contact with fire (large radius)
+- **Ice** - Freezes nearby water, melts near fire
+- **Plant** - Grows upward when touching water, 20% chance to sprout flowers
+- **Flower** - Colorful, flammable, spawns from plants
+- **Ash** - Falls like sand, only left behind when fire burns wood/plants
 
 ## Testing
 
