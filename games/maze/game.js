@@ -113,6 +113,7 @@ function renderMaze() {
                 cell.classList.add('player');
             } else if (x === goalPos.x && y === goalPos.y) {
                 cell.classList.add('goal');
+                cell.textContent = '🧀';
             } else if (maze[y][x] === 1) {
                 cell.classList.add('wall');
             } else {

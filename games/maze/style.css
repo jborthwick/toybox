@@ -104,14 +104,24 @@ button:hover {
 }
 
 .player {
-    background: #ff6b6b;
-    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4em;
+}
+
+.player::after {
+    content: '🐭';
     animation: pulse 1s infinite;
 }
 
 .goal {
-    background: #51cf66;
-    border-radius: 4px;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4em;
 }
 
 @keyframes pulse {
