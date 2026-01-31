@@ -6,7 +6,7 @@ A collection of fun browser games for kids. Designed with my 4-year-old and Clau
 
 - **A-maze-ing!** - Guide a mouse through randomly generated mazes to escape through the hole! Follow the cheese trail for points. Features adjustable maze sizes, scoring, and on-screen d-pad for touch devices.
 - **Feather Collect** - Move leaves to discover hidden feathers
-- **Powder Play** - Physics sandbox with sand, water, fire, wood, oil, ice, plants, and more. Watch ice freeze water, oil explode into fireballs, and plants grow flowers when watered!
+- **Powder Play** - Physics sandbox with sand, water, fire, wood, oil, ice, plants, popcorn kernels, and more. Watch ice freeze water, oil explode into fireballs, plants grow flowers when watered, and kernels pop into fluffy popcorn near heat!
 
 ## Running
 

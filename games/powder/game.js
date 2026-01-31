@@ -18,6 +18,8 @@ const TYPES = {
     PLANT: 10,
     ASH: 11,
     FLOWER: 12,
+    KERNEL: 13,
+    POPCORN: 14,
 };
 
 // Element colors
@@ -35,6 +37,8 @@ const COLORS = {
     [TYPES.PLANT]: '#228b22',
     [TYPES.ASH]: '#4a4a4a',
     [TYPES.FLOWER]: '#ff69b4',
+    [TYPES.KERNEL]: '#f5d742',
+    [TYPES.POPCORN]: '#fffef0',
 };
 
 // Flower color variations
@@ -46,8 +50,12 @@ const FIRE_COLORS = ['#ff6b35', '#ff8c42', '#ffd700', '#ff4500'];
 // Explosion color variations
 const EXPLOSION_COLORS = ['#ffff00', '#ffcc00', '#ff9900', '#ffffff'];
 
+// Popcorn color variations (white/cream shades)
+const POPCORN_COLORS = ['#fffef0', '#fff8dc', '#faf0e6', '#fffff0'];
+
 // Game state
 let grid = null;
+let popcornCooldown = null; // Tracks freshly popped popcorn immunity frames
 let selectedType = TYPES.SAND;
 let brushSize = 3;
 let isDrawing = false;
@@ -108,6 +116,7 @@ function swap(x1, y1, x2, y2) {
 // Initialize grid
 function initGrid() {
     grid = new Uint8Array(WIDTH * HEIGHT);
+    popcornCooldown = new Uint8Array(WIDTH * HEIGHT);
 }
 
 // Create explosion at position
@@ -297,6 +306,165 @@ function updateParticle(x, y, updated) {
                 }
             }
         }
+    } else if (type === TYPES.KERNEL) {
+        // Kernels fall like sand and pop when heated
+        let isHot = false;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const nx = x + dx;
+                const ny = y + dy;
+                const neighbor = getCell(nx, ny);
+                // Heat sources: fire, explosion, or freshly popped popcorn (still hot!)
+                if (neighbor === TYPES.FIRE || neighbor === TYPES.EXPLOSION) {
+                    isHot = true;
+                    break;
+                }
+                // Freshly popped popcorn transfers heat to nearby kernels
+                if (neighbor === TYPES.POPCORN && inBounds(nx, ny) && popcornCooldown[getIndex(nx, ny)] > 30) {
+                    isHot = true;
+                    break;
+                }
+            }
+            if (isHot) break;
+        }
+        // Pop into popcorn when hot (25% chance per update when near heat)
+        if (isHot && Math.random() < 0.25) {
+            // Explosive pop! The kernel expands into a fluffy cluster
+            setCell(x, y, TYPES.POPCORN);
+            popcornCooldown[idx] = 60;
+
+            // First, expand into adjacent empty spaces to make it "puffy"
+            // Each kernel becomes 2-4 pieces of popcorn clustered together
+            const expandDirs = [
+                { dx: 0, dy: -1 },   // up (priority)
+                { dx: -1, dy: 0 }, { dx: 1, dy: 0 },   // sides
+                { dx: -1, dy: -1 }, { dx: 1, dy: -1 }, // diagonal up
+            ];
+            let expanded = 0;
+            const maxExpand = 1 + Math.floor(Math.random() * 3); // 1-3 extra pieces
+            for (const ed of expandDirs) {
+                if (expanded >= maxExpand) break;
+                const ex = x + ed.dx;
+                const ey = y + ed.dy;
+                if (inBounds(ex, ey) && getCell(ex, ey) === TYPES.EMPTY) {
+                    setCell(ex, ey, TYPES.POPCORN);
+                    popcornCooldown[getIndex(ex, ey)] = 55 + Math.floor(Math.random() * 10);
+                    updated[getIndex(ex, ey)] = 1;
+                    expanded++;
+                }
+            }
+
+            // Then launch some pieces upward for the explosive effect
+            const launchDirs = [
+                { dx: 0, dy: -2 }, { dx: 0, dy: -3 },  // straight up
+                { dx: -1, dy: -2 }, { dx: 1, dy: -2 }, // diagonal up far
+                { dx: -2, dy: -1 }, { dx: 2, dy: -1 }, // wide diagonal
+            ];
+            // Shuffle for randomness
+            for (let i = launchDirs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [launchDirs[i], launchDirs[j]] = [launchDirs[j], launchDirs[i]];
+            }
+            const launchCount = 1 + Math.floor(Math.random() * 2); // 1-2 launched pieces
+            let launched = 0;
+            for (const ld of launchDirs) {
+                if (launched >= launchCount) break;
+                const lx = x + ld.dx;
+                const ly = y + ld.dy;
+                if (inBounds(lx, ly) && getCell(lx, ly) === TYPES.EMPTY) {
+                    setCell(lx, ly, TYPES.POPCORN);
+                    popcornCooldown[getIndex(lx, ly)] = 60;
+                    updated[getIndex(lx, ly)] = 1;
+                    launched++;
+                }
+            }
+            return;
+        }
+        // Fall like sand
+        if (isEmpty(x, y + 1) || isLiquid(below)) {
+            swap(x, y, x, y + 1);
+            updated[getIndex(x, y + 1)] = 1;
+        } else if (isEmpty(x + dir, y + 1) || isLiquid(getCell(x + dir, y + 1))) {
+            swap(x, y, x + dir, y + 1);
+            updated[getIndex(x + dir, y + 1)] = 1;
+        }
+    } else if (type === TYPES.POPCORN) {
+        // Decrement cooldown if active
+        if (popcornCooldown[idx] > 0) {
+            popcornCooldown[idx]--;
+        }
+        // Popcorn is light and fluffy - can be burned (but not while cooling down)
+        if (popcornCooldown[idx] === 0) {
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    const neighbor = getCell(x + dx, y + dy);
+                    // Burns if touching fire
+                    if (neighbor === TYPES.FIRE && Math.random() < 0.2) {
+                        setCell(x, y, TYPES.FIRE);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Freshly popped popcorn rises rapidly (like it's exploding upward)
+        if (popcornCooldown[idx] > 40) {
+            // Rising phase - move up aggressively
+            if (isEmpty(x, y - 1)) {
+                const newIdx = getIndex(x, y - 1);
+                popcornCooldown[newIdx] = popcornCooldown[idx];
+                popcornCooldown[idx] = 0;
+                swap(x, y, x, y - 1);
+                updated[newIdx] = 1;
+            } else if (isEmpty(x + dir, y - 1)) {
+                const newIdx = getIndex(x + dir, y - 1);
+                popcornCooldown[newIdx] = popcornCooldown[idx];
+                popcornCooldown[idx] = 0;
+                swap(x, y, x + dir, y - 1);
+                updated[newIdx] = 1;
+            } else if (isEmpty(x + dir, y)) {
+                // Move sideways if can't go up
+                const newIdx = getIndex(x + dir, y);
+                popcornCooldown[newIdx] = popcornCooldown[idx];
+                popcornCooldown[idx] = 0;
+                swap(x, y, x + dir, y);
+                updated[newIdx] = 1;
+            }
+        } else if (popcornCooldown[idx] > 20) {
+            // Floating phase - drift up slowly or sideways
+            if (Math.random() < 0.4) {
+                if (isEmpty(x, y - 1) && Math.random() < 0.5) {
+                    const newIdx = getIndex(x, y - 1);
+                    popcornCooldown[newIdx] = popcornCooldown[idx];
+                    popcornCooldown[idx] = 0;
+                    swap(x, y, x, y - 1);
+                    updated[newIdx] = 1;
+                } else if (isEmpty(x + dir, y)) {
+                    const newIdx = getIndex(x + dir, y);
+                    popcornCooldown[newIdx] = popcornCooldown[idx];
+                    popcornCooldown[idx] = 0;
+                    swap(x, y, x + dir, y);
+                    updated[newIdx] = 1;
+                }
+            }
+        } else {
+            // Settling phase - falls slowly (20% of updates)
+            if (Math.random() < 0.2) {
+                if (isEmpty(x, y + 1)) {
+                    const newIdx = getIndex(x, y + 1);
+                    popcornCooldown[newIdx] = popcornCooldown[idx];
+                    popcornCooldown[idx] = 0;
+                    swap(x, y, x, y + 1);
+                    updated[newIdx] = 1;
+                } else if (isEmpty(x + dir, y + 1)) {
+                    const newIdx = getIndex(x + dir, y + 1);
+                    popcornCooldown[newIdx] = popcornCooldown[idx];
+                    popcornCooldown[idx] = 0;
+                    swap(x, y, x + dir, y + 1);
+                    updated[newIdx] = 1;
+                }
+            }
+        }
     }
 }
 
@@ -340,6 +508,10 @@ function render() {
                 color = Math.random() < 0.3 ? '#5a5a5a' : '#4a4a4a';
             } else if (type === TYPES.FLOWER) {
                 color = FLOWER_COLORS[Math.floor((x * 7 + y * 13) % FLOWER_COLORS.length)];
+            } else if (type === TYPES.KERNEL) {
+                color = Math.random() < 0.2 ? '#d4b82e' : '#f5d742';
+            } else if (type === TYPES.POPCORN) {
+                color = POPCORN_COLORS[Math.floor(Math.random() * POPCORN_COLORS.length)];
             }
 
             // Parse hex color
