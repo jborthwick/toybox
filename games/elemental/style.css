@@ -11,17 +11,12 @@ html, body {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: #1a1a2e;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 15px;
-    padding-top: calc(15px + env(safe-area-inset-top));
-    padding-bottom: calc(15px + env(safe-area-inset-bottom));
-    padding-left: calc(15px + env(safe-area-inset-left));
-    padding-right: calc(15px + env(safe-area-inset-right));
 }
 
 .back-button {
@@ -44,60 +39,65 @@ body {
 }
 
 .game-container {
-    background: #2a2a4a;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-h1 {
-    color: #fff;
-    margin-bottom: 10px;
-    font-size: 1.8rem;
+    position: relative;
+    display: inline-block;
 }
 
 #game-canvas {
     border: 4px solid #4a4a6a;
-    border-radius: 8px;
+    border-radius: 30px;
     cursor: crosshair;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     -webkit-image-rendering: pixelated;
     display: block;
-    margin: 0 auto;
+}
+
+/* Overlay UI */
+.overlay-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    padding: 15px;
+}
+
+.overlay-ui > * {
+    pointer-events: auto;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .elements {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 6px;
-    margin-top: 10px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 80%;
 }
 
 .element-btn {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 8px 12px;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
     border: 3px solid transparent;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s;
-    background: #3a3a5a;
-    min-width: 60px;
+    background: rgba(58, 58, 90, 0.9);
 }
 
 .element-btn:hover {
-    transform: scale(1.05);
-    background: #4a4a6a;
+    transform: scale(1.1);
+    background: rgba(74, 74, 106, 0.95);
 }
 
 .element-btn.selected {
@@ -110,106 +110,107 @@ h1 {
     font-size: 1.5rem;
 }
 
-.element-btn .label {
-    font-size: 0.7rem;
-    color: #ccc;
-    margin-top: 2px;
-    font-weight: bold;
-}
-
 /* Element-specific colors */
-.element-btn[data-type="0"] { background: #444; }
-.element-btn[data-type="1"] { background: #e6c86e; }
-.element-btn[data-type="1"] .label { color: #333; }
-.element-btn[data-type="2"] { background: #4a90d9; }
-.element-btn[data-type="3"] { background: #6b6b6b; }
-.element-btn[data-type="4"] { background: #ff6b35; }
-.element-btn[data-type="4"] .label { color: #333; }
-.element-btn[data-type="5"] { background: #8b5a2b; }
-.element-btn[data-type="6"] { background: #708090; }
-.element-btn[data-type="7"] { background: #2d2d2d; }
-
-.controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-}
-
-.controls label {
-    color: #ccc;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.controls input[type="range"] {
-    width: 100px;
-    cursor: pointer;
-}
-
-#brush-value {
-    color: #ffd700;
-    min-width: 20px;
-}
+.element-btn[data-type="0"] { background: rgba(68, 68, 68, 0.9); }
+.element-btn[data-type="1"] { background: rgba(230, 200, 110, 0.9); }
+.element-btn[data-type="2"] { background: rgba(74, 144, 217, 0.9); }
+.element-btn[data-type="3"] { background: rgba(107, 107, 107, 0.9); }
+.element-btn[data-type="4"] { background: rgba(255, 107, 53, 0.9); }
+.element-btn[data-type="5"] { background: rgba(139, 90, 43, 0.9); }
+.element-btn[data-type="6"] { background: rgba(112, 128, 144, 0.9); }
+.element-btn[data-type="7"] { background: rgba(45, 45, 45, 0.9); }
+.element-btn[data-type="8"] { background: rgba(168, 228, 239, 0.9); }
+.element-btn[data-type="10"] { background: rgba(34, 139, 34, 0.9); }
+.element-btn[data-type="11"] { background: rgba(74, 74, 74, 0.9); }
+.element-btn[data-type="13"] { background: rgba(245, 215, 66, 0.9); }
 
 #clear-btn {
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-size: 1rem;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     transition: all 0.2s;
-    background: #e74c3c;
+    background: rgba(231, 76, 60, 0.9);
     color: white;
     font-weight: bold;
 }
 
 #clear-btn:hover {
-    background: #c0392b;
+    background: rgba(192, 57, 43, 0.95);
     transform: scale(1.05);
 }
 
-.instructions {
-    color: #888;
-    margin-top: 8px;
-    font-size: 0.8rem;
+/* Brush control - vertical slider on left side */
+.brush-control {
+    position: absolute;
+    top: 80px;
+    left: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(42, 42, 74, 0.9);
+    padding: 12px 8px;
+    border-radius: 10px;
+}
+
+.brush-icon {
+    font-size: 1.5rem;
+}
+
+#brush-size {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    width: 8px;
+    height: 100px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+#brush-size::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffd700;
+    cursor: pointer;
+}
+
+#brush-size::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffd700;
+    cursor: pointer;
+    border: none;
 }
 
 @media (max-width: 550px) {
-    .game-container {
-        padding: 15px;
-    }
-
-    h1 {
-        font-size: 1.8rem;
-    }
-
     .element-btn {
-        padding: 6px 8px;
-        min-width: 50px;
+        width: 40px;
+        height: 40px;
     }
 
     .element-btn .emoji {
         font-size: 1.2rem;
     }
 
-    .element-btn .label {
-        font-size: 0.6rem;
-    }
-
-    .controls {
-        gap: 10px;
-    }
-
-    .controls label {
+    #clear-btn {
+        padding: 10px 15px;
         font-size: 0.9rem;
     }
 
-    .controls input[type="range"] {
-        width: 80px;
+    .brush-control {
+        top: 70px;
+        padding: 10px 6px;
+    }
+
+    #brush-size {
+        height: 80px;
     }
 }

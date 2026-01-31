@@ -1,7 +1,7 @@
 // Constants
 const CELL_SIZE = 4;
-const WIDTH = 160;
-const HEIGHT = 120;
+const WIDTH = 270;
+const HEIGHT = 170;
 
 // Element types
 const TYPES = {
@@ -64,7 +64,6 @@ let isDrawing = false;
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 const brushSlider = document.getElementById('brush-size');
-const brushValue = document.getElementById('brush-value');
 const clearBtn = document.getElementById('clear-btn');
 const elementBtns = document.querySelectorAll('.element-btn');
 
@@ -599,7 +598,6 @@ elementBtns.forEach(btn => {
 // Brush size
 brushSlider.addEventListener('input', () => {
     brushSize = parseInt(brushSlider.value);
-    brushValue.textContent = brushSize;
 });
 
 // Clear button
