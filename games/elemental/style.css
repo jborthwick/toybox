@@ -190,6 +190,36 @@ body {
     border: none;
 }
 
+/* Tool buttons (dynamite, etc.) */
+.tool-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(180, 60, 40, 0.9);
+    margin-top: 8px;
+}
+
+.tool-btn:hover {
+    transform: scale(1.1);
+    background: rgba(200, 80, 60, 0.95);
+}
+
+.tool-btn.active {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.tool-btn .emoji {
+    font-size: 1.4rem;
+}
+
 @media (max-width: 550px) {
     .element-btn {
         width: 40px;
@@ -212,5 +242,14 @@ body {
 
     #brush-size {
         height: 80px;
+    }
+
+    .tool-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .tool-btn .emoji {
+        font-size: 1.2rem;
     }
 }

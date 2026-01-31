@@ -20,6 +20,7 @@ const TYPES = {
     FLOWER: 12,
     KERNEL: 13,
     POPCORN: 14,
+    DYNAMITE: 15,
 };
 
 // Element colors
@@ -39,6 +40,7 @@ const COLORS = {
     [TYPES.FLOWER]: '#ff69b4',
     [TYPES.KERNEL]: '#f5d742',
     [TYPES.POPCORN]: '#fffef0',
+    [TYPES.DYNAMITE]: '#cc2200',
 };
 
 // Flower color variations
@@ -56,6 +58,7 @@ const POPCORN_COLORS = ['#fffef0', '#fff8dc', '#faf0e6', '#fffff0'];
 // Game state
 let grid = null;
 let popcornCooldown = null; // Tracks freshly popped popcorn immunity frames
+let dynamiteFuse = null; // Tracks fuse countdown for dynamite (0 = not lit, >0 = countdown)
 let selectedType = TYPES.SAND;
 let brushSize = 3;
 let isDrawing = false;
@@ -66,6 +69,10 @@ const ctx = canvas.getContext('2d');
 const brushSlider = document.getElementById('brush-size');
 const clearBtn = document.getElementById('clear-btn');
 const elementBtns = document.querySelectorAll('.element-btn');
+const dynamiteBtn = document.getElementById('dynamite-btn');
+
+// Tool mode: 'brush' or 'dynamite'
+let toolMode = 'brush';
 
 // Set canvas size
 canvas.width = WIDTH;
@@ -116,6 +123,7 @@ function swap(x1, y1, x2, y2) {
 function initGrid() {
     grid = new Uint8Array(WIDTH * HEIGHT);
     popcornCooldown = new Uint8Array(WIDTH * HEIGHT);
+    dynamiteFuse = new Uint16Array(WIDTH * HEIGHT); // Use 16-bit for longer fuse times
 }
 
 // Create explosion at position
@@ -464,6 +472,41 @@ function updateParticle(x, y, updated) {
                 }
             }
         }
+    } else if (type === TYPES.DYNAMITE) {
+        // Dynamite: lit fuse counts down, then explodes BIG
+        // Fuse starts at 180 frames (~3 seconds at 60fps)
+        if (dynamiteFuse[idx] > 0) {
+            dynamiteFuse[idx]--;
+            // BOOM when fuse reaches 0
+            if (dynamiteFuse[idx] === 0) {
+                explode(x, y, 25); // Big explosion radius
+                return;
+            }
+        }
+        // Falls like sand until it lands
+        if (isEmpty(x, y + 1)) {
+            const newIdx = getIndex(x, y + 1);
+            dynamiteFuse[newIdx] = dynamiteFuse[idx];
+            dynamiteFuse[idx] = 0;
+            swap(x, y, x, y + 1);
+            updated[newIdx] = 1;
+        } else if (isEmpty(x + dir, y + 1)) {
+            const newIdx = getIndex(x + dir, y + 1);
+            dynamiteFuse[newIdx] = dynamiteFuse[idx];
+            dynamiteFuse[idx] = 0;
+            swap(x, y, x + dir, y + 1);
+            updated[newIdx] = 1;
+        }
+        // Can be set off early by fire/explosion
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const neighbor = getCell(x + dx, y + dy);
+                if (neighbor === TYPES.FIRE || neighbor === TYPES.EXPLOSION) {
+                    explode(x, y, 25);
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -511,6 +554,14 @@ function render() {
                 color = Math.random() < 0.2 ? '#d4b82e' : '#f5d742';
             } else if (type === TYPES.POPCORN) {
                 color = POPCORN_COLORS[Math.floor(Math.random() * POPCORN_COLORS.length)];
+            } else if (type === TYPES.DYNAMITE) {
+                // Dynamite flickers as fuse burns down
+                const fuse = dynamiteFuse[getIndex(x, y)];
+                if (fuse > 0 && Math.random() < 0.3) {
+                    color = '#ff4400'; // Flicker bright when lit
+                } else {
+                    color = '#cc2200';
+                }
             }
 
             // Parse hex color
@@ -528,6 +579,20 @@ function render() {
     }
 
     ctx.putImageData(imageData, 0, 0);
+}
+
+// Drop a single dynamite at position
+function dropDynamite(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = WIDTH / rect.width;
+    const scaleY = HEIGHT / rect.height;
+    const x = Math.floor((clientX - rect.left) * scaleX);
+    const y = Math.floor((clientY - rect.top) * scaleY);
+
+    if (inBounds(x, y) && isEmpty(x, y)) {
+        setCell(x, y, TYPES.DYNAMITE);
+        dynamiteFuse[getIndex(x, y)] = 180; // ~3 seconds at 60fps
+    }
 }
 
 // Paint with brush
@@ -560,7 +625,11 @@ function handlePointerDown(e) {
     isDrawing = true;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    paint(clientX, clientY);
+    if (toolMode === 'dynamite') {
+        dropDynamite(clientX, clientY);
+    } else {
+        paint(clientX, clientY);
+    }
     e.preventDefault();
 }
 
@@ -568,7 +637,10 @@ function handlePointerMove(e) {
     if (!isDrawing) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    paint(clientX, clientY);
+    // Dynamite only drops on click, not drag
+    if (toolMode === 'brush') {
+        paint(clientX, clientY);
+    }
     e.preventDefault();
 }
 
@@ -592,7 +664,25 @@ elementBtns.forEach(btn => {
         elementBtns.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedType = parseInt(btn.dataset.type);
+        // Switch back to brush mode when selecting an element
+        toolMode = 'brush';
+        dynamiteBtn.classList.remove('active');
     });
+});
+
+// Dynamite tool button
+dynamiteBtn.addEventListener('click', () => {
+    if (toolMode === 'dynamite') {
+        // Toggle off - go back to brush mode
+        toolMode = 'brush';
+        dynamiteBtn.classList.remove('active');
+    } else {
+        // Toggle on - dynamite mode
+        toolMode = 'dynamite';
+        dynamiteBtn.classList.add('active');
+        // Deselect element buttons visually
+        elementBtns.forEach(b => b.classList.remove('selected'));
+    }
 });
 
 // Brush size
