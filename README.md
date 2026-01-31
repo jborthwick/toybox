@@ -12,6 +12,15 @@ A collection of fun browser games for kids. Designed with my 4-year-old and Clau
 
 Open `index.html` in any modern browser. No installation or build step required.
 
+## iPad Web App
+
+Toybox can be installed as a web app on iPad for a fullscreen experience:
+1. Open the site in Safari
+2. Tap the Share button
+3. Select "Add to Home Screen"
+
+The app includes PWA support with safe area insets for notched devices.
+
 ## Adding Games
 
 Create a new folder under `games/` with `index.html`, `style.css`, and `game.js`, then add a link card to the root `index.html`.
