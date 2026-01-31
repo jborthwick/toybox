@@ -14,52 +14,54 @@
         <canvas id="game-canvas"></canvas>
         <div class="overlay-ui">
             <div class="top-bar">
-                <div class="elements">
-                    <button class="element-btn selected" data-type="1">
-                        <span class="emoji">🏖️</span>
-                    </button>
-                    <button class="element-btn" data-type="2">
-                        <span class="emoji">💧</span>
-                    </button>
-                    <button class="element-btn" data-type="3">
-                        <span class="emoji">🧱</span>
-                    </button>
-                    <button class="element-btn" data-type="4">
-                        <span class="emoji">🔥</span>
-                    </button>
-                    <button class="element-btn" data-type="5">
-                        <span class="emoji">🪵</span>
-                    </button>
-                    <button class="element-btn" data-type="6">
-                        <span class="emoji">💨</span>
-                    </button>
-                    <button class="element-btn" data-type="7">
-                        <span class="emoji">🛢️</span>
-                    </button>
-                    <button class="element-btn" data-type="8">
-                        <span class="emoji">🧊</span>
-                    </button>
-                    <button class="element-btn" data-type="10">
-                        <span class="emoji">🌱</span>
-                    </button>
-                    <button class="element-btn" data-type="11">
-                        <span class="emoji">🌫️</span>
-                    </button>
-                    <button class="element-btn" data-type="13">
-                        <span class="emoji">🌽</span>
-                    </button>
-                    <button class="element-btn" data-type="0">
-                        <span class="emoji">🧹</span>
-                    </button>
+                <div class="left-controls">
+                    <div class="elements">
+                        <button class="element-btn selected" data-type="1">
+                            <span class="emoji">🏖️</span>
+                        </button>
+                        <button class="element-btn" data-type="2">
+                            <span class="emoji">💧</span>
+                        </button>
+                        <button class="element-btn" data-type="3">
+                            <span class="emoji">🧱</span>
+                        </button>
+                        <button class="element-btn" data-type="4">
+                            <span class="emoji">🔥</span>
+                        </button>
+                        <button class="element-btn" data-type="5">
+                            <span class="emoji">🪵</span>
+                        </button>
+                        <button class="element-btn" data-type="6">
+                            <span class="emoji">💨</span>
+                        </button>
+                        <button class="element-btn" data-type="7">
+                            <span class="emoji">🛢️</span>
+                        </button>
+                        <button class="element-btn" data-type="8">
+                            <span class="emoji">🧊</span>
+                        </button>
+                        <button class="element-btn" data-type="10">
+                            <span class="emoji">🌱</span>
+                        </button>
+                        <button class="element-btn" data-type="11">
+                            <span class="emoji">🌫️</span>
+                        </button>
+                        <button class="element-btn" data-type="13">
+                            <span class="emoji">🌽</span>
+                        </button>
+                        <button class="element-btn" data-type="0">
+                            <span class="emoji">🧹</span>
+                        </button>
+                    </div>
+                    <div class="brush-control">
+                        <span class="brush-icon">🖌️</span>
+                        <input type="range" id="brush-size" min="1" max="10" value="3" orient="vertical">
+                        <button id="dynamite-btn" class="tool-btn" title="Drop Dynamite">
+                            <span class="emoji">🧨</span>
+                        </button>
+                    </div>
                 </div>
                 <button id="clear-btn">Clear</button>
-            </div>
-            <div class="brush-control">
-                <span class="brush-icon">🖌️</span>
-                <input type="range" id="brush-size" min="1" max="10" value="3" orient="vertical">
-                <button id="dynamite-btn" class="tool-btn" title="Drop Dynamite">
-                    <span class="emoji">🧨</span>
-                </button>
             </div>
         </div>
     </div>

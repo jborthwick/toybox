@@ -41,6 +41,8 @@ body {
 .game-container {
     position: relative;
     display: inline-block;
+    margin-top: 60px;
+    max-height: calc(100dvh - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
 #game-canvas {
@@ -51,6 +53,9 @@ body {
     image-rendering: crisp-edges;
     -webkit-image-rendering: pixelated;
     display: block;
+    max-height: calc(100dvh - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-width: calc(100vw - 40px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    object-fit: contain;
 }
 
 /* Overlay UI */
@@ -62,6 +67,8 @@ body {
     bottom: 0;
     pointer-events: none;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
 }
 
 .overlay-ui > * {
@@ -74,11 +81,20 @@ body {
     align-items: flex-start;
 }
 
+.left-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+    max-width: calc(100% - 100px);
+}
+
 .elements {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    max-width: 80%;
+    width: 100%;
 }
 
 .element-btn {
@@ -143,9 +159,6 @@ body {
 
 /* Brush control - vertical slider on left side */
 .brush-control {
-    position: absolute;
-    top: 80px;
-    left: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -153,6 +166,7 @@ body {
     background: rgba(42, 42, 74, 0.9);
     padding: 12px 8px;
     border-radius: 10px;
+    margin-top: 10px;
 }
 
 .brush-icon {
@@ -236,7 +250,6 @@ body {
     }
 
     .brush-control {
-        top: 70px;
         padding: 10px 6px;
     }
 
