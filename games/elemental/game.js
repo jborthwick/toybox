@@ -53,6 +53,7 @@ const TYPES = {
     KERNEL: 13,
     POPCORN: 14,
     DYNAMITE: 15,
+    LAVA: 16,
 };
 
 // Element colors
@@ -73,6 +74,7 @@ const COLORS = {
     [TYPES.KERNEL]: '#f5d742',
     [TYPES.POPCORN]: '#fffef0',
     [TYPES.DYNAMITE]: '#cc2200',
+    [TYPES.LAVA]: '#ff4500',
 };
 
 // Flower color variations
@@ -86,6 +88,9 @@ const EXPLOSION_COLORS = ['#ffff00', '#ffcc00', '#ff9900', '#ffffff'];
 
 // Popcorn color variations (white/cream shades)
 const POPCORN_COLORS = ['#fffef0', '#fff8dc', '#faf0e6', '#fffff0'];
+
+// Lava color variations (orange/red glowing)
+const LAVA_COLORS = ['#ff4500', '#ff6600', '#ff3300', '#ff5500', '#cc3300'];
 
 // Game state
 let grid = null;
@@ -281,14 +286,14 @@ function updateParticle(x, y, updated) {
             swap(x, y, x + dir, y);
         }
     } else if (type === TYPES.ICE) {
-        // Ice freezes nearby water and melts near fire
+        // Ice freezes nearby water and melts near fire/lava
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 const neighbor = getCell(x + dx, y + dy);
                 if (neighbor === TYPES.WATER && Math.random() < 0.15) {
                     setCell(x + dx, y + dy, TYPES.ICE);
                 }
-                if (neighbor === TYPES.FIRE) {
+                if (neighbor === TYPES.FIRE || neighbor === TYPES.LAVA) {
                     setCell(x, y, TYPES.WATER);
                     return;
                 }
@@ -353,8 +358,8 @@ function updateParticle(x, y, updated) {
                 const nx = x + dx;
                 const ny = y + dy;
                 const neighbor = getCell(nx, ny);
-                // Heat sources: fire, explosion, or freshly popped popcorn (still hot!)
-                if (neighbor === TYPES.FIRE || neighbor === TYPES.EXPLOSION) {
+                // Heat sources: fire, explosion, lava, or freshly popped popcorn (still hot!)
+                if (neighbor === TYPES.FIRE || neighbor === TYPES.EXPLOSION || neighbor === TYPES.LAVA) {
                     isHot = true;
                     break;
                 }
@@ -437,8 +442,8 @@ function updateParticle(x, y, updated) {
             for (let dx = -1; dx <= 1; dx++) {
                 for (let dy = -1; dy <= 1; dy++) {
                     const neighbor = getCell(x + dx, y + dy);
-                    // Burns if touching fire
-                    if (neighbor === TYPES.FIRE && Math.random() < 0.2) {
+                    // Burns if touching fire or lava
+                    if ((neighbor === TYPES.FIRE || neighbor === TYPES.LAVA) && Math.random() < 0.2) {
                         setCell(x, y, TYPES.FIRE);
                         return;
                     }
@@ -529,14 +534,52 @@ function updateParticle(x, y, updated) {
             swap(x, y, x + dir, y + 1);
             updated[newIdx] = 1;
         }
-        // Can be set off early by fire/explosion
+        // Can be set off early by fire/explosion/lava
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 const neighbor = getCell(x + dx, y + dy);
-                if (neighbor === TYPES.FIRE || neighbor === TYPES.EXPLOSION) {
+                if (neighbor === TYPES.FIRE || neighbor === TYPES.EXPLOSION || neighbor === TYPES.LAVA) {
                     explode(x, y, 25);
                     return;
                 }
+            }
+        }
+    } else if (type === TYPES.LAVA) {
+        // Lava: viscous hot liquid that cools into stone when touching water
+        // Check for interactions with neighbors
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const neighbor = getCell(x + dx, y + dy);
+                // Water cools lava into stone and becomes steam
+                if (neighbor === TYPES.WATER) {
+                    setCell(x, y, TYPES.STONE);
+                    setCell(x + dx, y + dy, TYPES.SMOKE); // Steam
+                    return;
+                }
+                // Lava ignites flammable materials
+                if (isFlammable(neighbor) && Math.random() < 0.15) {
+                    setCell(x + dx, y + dy, TYPES.FIRE);
+                }
+                // Lava melts ice into water
+                if (neighbor === TYPES.ICE && Math.random() < 0.4) {
+                    setCell(x + dx, y + dy, TYPES.WATER);
+                }
+            }
+        }
+        // Lava flows slowly like viscous liquid (only moves 30% of updates)
+        if (Math.random() < 0.3) {
+            if (isEmpty(x, y + 1)) {
+                swap(x, y, x, y + 1);
+                updated[getIndex(x, y + 1)] = 1;
+            } else if (isEmpty(x + dir, y + 1)) {
+                swap(x, y, x + dir, y + 1);
+                updated[getIndex(x + dir, y + 1)] = 1;
+            } else if (isEmpty(x + dir, y)) {
+                swap(x, y, x + dir, y);
+                updated[getIndex(x + dir, y)] = 1;
+            } else if (isEmpty(x - dir, y)) {
+                swap(x, y, x - dir, y);
+                updated[getIndex(x - dir, y)] = 1;
             }
         }
     }
@@ -594,6 +637,9 @@ function render() {
                 } else {
                     color = '#cc2200';
                 }
+            } else if (type === TYPES.LAVA) {
+                // Lava glows and flickers
+                color = LAVA_COLORS[Math.floor(Math.random() * LAVA_COLORS.length)];
             }
 
             // Parse hex color
