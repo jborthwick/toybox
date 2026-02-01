@@ -75,10 +75,6 @@ body {
     flex-direction: column;
 }
 
-.overlay-ui > * {
-    pointer-events: auto;
-}
-
 .top-bar {
     display: flex;
     justify-content: space-between;
@@ -113,6 +109,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     background: rgba(58, 58, 90, 0.9);
+    pointer-events: auto;
 }
 
 .element-btn:hover {
@@ -154,6 +151,7 @@ body {
     background: rgba(231, 76, 60, 0.9);
     color: white;
     font-weight: bold;
+    pointer-events: auto;
 }
 
 #clear-btn:hover {
@@ -171,6 +169,7 @@ body {
     padding: 12px 8px;
     border-radius: 10px;
     margin-top: 10px;
+    pointer-events: auto;
 }
 
 .brush-icon {
@@ -221,6 +220,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     background: rgba(180, 60, 40, 0.9);
+    pointer-events: auto;
 }
 
 .tool-btn:hover {
