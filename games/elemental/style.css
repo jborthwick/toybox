@@ -1,3 +1,11 @@
+:root {
+    /* Expose safe area insets as CSS custom properties for JavaScript */
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+    --sar: env(safe-area-inset-right);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -42,7 +50,6 @@ body {
     position: relative;
     display: inline-block;
     margin-top: 60px;
-    max-height: calc(100dvh - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
 #game-canvas {
@@ -53,9 +60,6 @@ body {
     image-rendering: crisp-edges;
     -webkit-image-rendering: pixelated;
     display: block;
-    max-height: calc(100dvh - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    max-width: calc(100vw - 40px - env(safe-area-inset-left) - env(safe-area-inset-right));
-    object-fit: contain;
 }
 
 /* Overlay UI */

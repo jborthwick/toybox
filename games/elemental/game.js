@@ -1,7 +1,39 @@
 // Constants
 const CELL_SIZE = 4;
-const WIDTH = 270;
-const HEIGHT = 170;
+
+// Calculate grid size based on available screen space
+function calculateGridSize() {
+    // Get safe area insets (for notches, home indicators, etc.)
+    const style = getComputedStyle(document.documentElement);
+    const safeTop = parseInt(style.getPropertyValue('--sat') || '0') || 0;
+    const safeBottom = parseInt(style.getPropertyValue('--sab') || '0') || 0;
+    const safeLeft = parseInt(style.getPropertyValue('--sal') || '0') || 0;
+    const safeRight = parseInt(style.getPropertyValue('--sar') || '0') || 0;
+
+    // Get available space (accounting for margins, safe areas, border, etc.)
+    // 40px horizontal padding + 8px border (4px each side) + safe areas
+    const maxWidth = window.innerWidth - 56 - safeLeft - safeRight;
+    // 100px for back button/top margin + 20px bottom margin + 8px border + safe areas
+    const maxHeight = window.innerHeight - 128 - safeTop - safeBottom;
+
+    // Calculate grid dimensions - divide display size by cell size
+    let width = Math.floor(maxWidth / CELL_SIZE);
+    let height = Math.floor(maxHeight / CELL_SIZE);
+
+    // Cap grid at reasonable maximums for performance
+    width = Math.min(width, 320);
+    height = Math.min(height, 200);
+
+    // Ensure minimum playable size
+    width = Math.max(width, 80);
+    height = Math.max(height, 60);
+
+    return { width, height };
+}
+
+const gridSize = calculateGridSize();
+let WIDTH = gridSize.width;
+let HEIGHT = gridSize.height;
 
 // Element types
 const TYPES = {
