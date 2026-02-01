@@ -128,7 +128,7 @@ body {
 }
 
 /* Element-specific colors */
-.element-btn[data-type="0"] { background: rgba(68, 68, 68, 0.9); }
+.element-btn[data-type="0"] { background: rgba(180, 150, 110, 0.9); }
 .element-btn[data-type="1"] { background: rgba(230, 200, 110, 0.9); }
 .element-btn[data-type="2"] { background: rgba(74, 144, 217, 0.9); }
 .element-btn[data-type="3"] { background: rgba(107, 107, 107, 0.9); }
