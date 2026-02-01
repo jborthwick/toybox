@@ -40,7 +40,7 @@ const TYPES = {
     EMPTY: 0,
     SAND: 1,
     WATER: 2,
-    WALL: 3,
+    STONE: 3,
     FIRE: 4,
     WOOD: 5,
     SMOKE: 6,
@@ -60,7 +60,7 @@ const COLORS = {
     [TYPES.EMPTY]: '#1a1a2e',
     [TYPES.SAND]: '#e6c86e',
     [TYPES.WATER]: '#4a90d9',
-    [TYPES.WALL]: '#6b6b6b',
+    [TYPES.STONE]: '#6b6b6b',
     [TYPES.FIRE]: '#ff6b35',
     [TYPES.WOOD]: '#8b5a2b',
     [TYPES.SMOKE]: '#708090',
@@ -122,7 +122,7 @@ function inBounds(x, y) {
 }
 
 function getCell(x, y) {
-    return inBounds(x, y) ? grid[getIndex(x, y)] : TYPES.WALL;
+    return inBounds(x, y) ? grid[getIndex(x, y)] : TYPES.STONE;
 }
 
 function setCell(x, y, type) {
@@ -186,7 +186,7 @@ function updateParticle(x, y, updated) {
     const type = getCell(x, y);
     const idx = getIndex(x, y);
 
-    if (type === TYPES.EMPTY || type === TYPES.WALL || updated[idx]) {
+    if (type === TYPES.EMPTY || type === TYPES.STONE || updated[idx]) {
         return;
     }
 
@@ -642,8 +642,8 @@ function paint(clientX, clientY) {
                 const nx = x + dx;
                 const ny = y + dy;
                 if (inBounds(nx, ny)) {
-                    // Eraser and wall can overwrite, others only fill empty
-                    if (selectedType === TYPES.EMPTY || selectedType === TYPES.WALL || isEmpty(nx, ny)) {
+                    // Eraser and stone can overwrite, others only fill empty
+                    if (selectedType === TYPES.EMPTY || selectedType === TYPES.STONE || isEmpty(nx, ny)) {
                         setCell(nx, ny, selectedType);
                     }
                 }
